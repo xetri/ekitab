@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  client:
+    container_name: ekitab_client
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - VITE_API_URL=http://localhost:8000
+    depends_on:
+      - server
+
+  server:
+    container_name: ekitab_server
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - PORT=8000
+      - JWT_SECRET_KEY=weak-secret-key
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/ekitab
+      - MINIO_ENDPOINT=minio
+      - MINIO_PORT=9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+    depends_on:
+      - postgres
+      - minio
+
+  postgres:
+    container_name: ekitab_postgres
+    image: postgres:15.2-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=ekitab
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  minio:
+    container_name: ekitab_minio
+    image: minio/minio:latest
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    environment:
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    command: server --console-address ":9001" /data
+
+volumes:
+  postgres_data:
+  minio_data:
