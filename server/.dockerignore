@@ -1,0 +1,33 @@
+# Ignore node_modules (they will be installed inside the container)
+node_modules
+
+# Ignore log files
+*.log
+
+# Ignore environment files
+.env
+
+# Ignore build directories
+dist
+build
+out
+
+# Ignore Docker-related files
+Dockerfile
+.dockerignore
+
+# Ignore source control files
+.git
+.gitignore
+
+# Ignore test files or directories
+test
+tests
+
+# Ignore any other unnecessary files
+*.md
+*.json # or specific files like package-lock.json if you want to exclude them
+
+# Ignore directories used for development or local builds
+.vscode
+.idea
