@@ -1,25 +1,27 @@
 {
     "compilerOptions": {
         "target": "ES2020",
-        "module": "ESNext",
-        "moduleResolution": "bundler",
+        "lib": ["ES2020"],
+        "moduleResolution": "node",
+        "outDir": "./dist",
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "strict": false,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "skipLibCheck": true,
+        "resolveJsonModule": true,
         "baseUrl": ".",
         "paths": {
             "@/*": ["./src/*"],
             "@config/*": ["./src/config/*"],
-            "@db/*": ["./src/db/*"],
-            "@schemas/*": ["./src/db/schemas/*"],
+            "@modals/*": ["./src/modals/*"],
+            "@type/*": ["src/type/*"],
             "@utils/*": ["./src/utils/*"],
             "@routes/*": ["./src/routes/*"],
-            "@services/*": ["./src/services/*"],
-            "@types/*": ["./src/types/*"],
+            "@services/*": ["./src/services/*"]
         },
-        "outDir": "./dist",
-        "esModuleInterop": true,
-        "forceConsistentCasingInFileNames": true,
-        "strict": true,
-        "skipLibCheck": true,
-        "resolveJsonModule": true
     },
-    "include": ["src/**/*"]
+    "include": ["src/**/*"],
+    "exclude": ["node_modules/", "dist/"]
 }
