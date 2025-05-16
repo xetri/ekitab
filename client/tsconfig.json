@@ -20,10 +20,13 @@
         "baseUrl": ".",
         "paths": {
             "@/*": ["./src/*"],
+            "@styles/*": ["./src/styles/*"],
             "@config/*": ["./src/config/*"],
             "@assets/*": ["./src/assets/*"],
             "@components/*": ["./src/components/*"],
             "@ui/*": ["./src/components/ui/*"],
+            "@pages/*": ["./src/components/pages/*"],
+            "@lib/*": ["./src/lib/*"],
         }
     },
     "include": ["src"],
