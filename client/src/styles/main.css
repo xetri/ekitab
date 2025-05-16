@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "tailwindcss/preflight";
 
 @layer theme {
     @import "./theme.css";
