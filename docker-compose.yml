@@ -30,9 +30,9 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=8000
-      - JWT_SECRET_KEY=weak-secret-key
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/ekitab
-      - MINIO_ENDPOINT=minio
+      - JWT_SECRET_KEY=weak-secret-key
+      - MINIO_ENDPOINT=localhost
       - MINIO_PORT=9000
       - MINIO_ACCESS_KEY=minioadmin
       - MINIO_SECRET_KEY=minioadmin
