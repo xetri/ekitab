@@ -1,22 +1,46 @@
+import { useState } from "react";
+import axios from "axios";
 import { Form } from "radix-ui";
 import { Button } from "@radix-ui/themes";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "react-toastify";
+import config from "@/config";
 import Input, { PasswordInput } from "@ui/Input";
 import { signupSchema, SignUpData } from "@ekitab/shared/validation/auth";
+import { useAuth } from "@lib/store/auth";
+import { useAuthDialog } from "@lib/store/auth-dialog";
 
-type Props = {};
+type Props = {
+    email: string;
+    setEmail: (email: string) => void;
+};
 
-function SignupForm({}: Props) {
-    const { register, handleSubmit, formState: { errors }, setError } = useForm<SignUpData>({
+function SignupForm({ email, setEmail }: Props) {
+    const { register, handleSubmit, formState: { errors } } = useForm<SignUpData>({
         resolver: zodResolver(signupSchema),
         mode: "onSubmit",
         reValidateMode: "onSubmit"
     });
+    const [loading, setLoading] = useState(false);
+    const auth = useAuth();
+    const authDialog = useAuthDialog();
 
-    const onSubmit = (data: SignUpData) => {
-        console.log(data)
-        setError("root", { type: "manual", message: "Email already exists" });
+
+    const onSubmit = async (data: SignUpData) => {
+        setLoading(true);
+        try {
+            const res = await axios.post(config.API_URL + "/signup", data, {
+                withCredentials: true,
+            });
+            toast.success("Signed up successfully");
+            auth.login(res.data.user);
+            authDialog.setOpen(false);
+        } catch(e: any) {
+            const errorMessage = e.response?.data?.message || "Failed to connect to server";
+            toast.error(errorMessage);
+            setLoading(false);
+        }
     };
 
     return (
@@ -30,6 +54,9 @@ function SignupForm({}: Props) {
                                 type="email"
                                 placeholder="Email"
                                 {...register("email")}
+                                disabled={loading}
+                                value={email}
+                                onChange={(e) => setEmail(e.currentTarget.value)}
                             />
                             {errors.email && (
                                 <span className="text-sm text-red-500">{errors.email.message}</span>
@@ -41,6 +68,7 @@ function SignupForm({}: Props) {
                                 type="text"
                                 placeholder="Name"
                                 {...register("name")}
+                                disabled={loading}
                             />
                             {errors.name && (
                                 <span className="text-sm text-red-500">{errors.name.message}</span>
@@ -52,6 +80,7 @@ function SignupForm({}: Props) {
                                 className="peer"
                                 placeholder="Password"
                                 {...register("password")}
+                                disabled={loading}
                             />
                             {errors.password && (
                                 <span className="text-sm text-red-500">{errors.password.message}</span>
@@ -63,6 +92,7 @@ function SignupForm({}: Props) {
                                 className="peer"
                                 placeholder="Confirm Password"
                                 {...register("confirmPassword")}
+                                disabled={loading}
                             />
                             {errors.confirmPassword && (
                                 <span className="text-sm text-red-500">{errors.confirmPassword.message}</span>
@@ -75,7 +105,9 @@ function SignupForm({}: Props) {
                         )}
                     </div>
                     <Form.Submit asChild>
-                        <Button className="w-full bg-primary text-white mt-3">
+                        <Button className="w-full bg-primary text-white mt-3"
+                            disabled={loading}
+                        >
                             Signup
                         </Button>
                     </Form.Submit>

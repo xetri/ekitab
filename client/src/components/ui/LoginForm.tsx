@@ -1,24 +1,50 @@
+import axios from "axios";
+import { useState } from "react";
 import { Form } from "radix-ui";
 import { Button } from "@radix-ui/themes";
 import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Input, { PasswordInput } from "@ui/Input";
 import { useAuthDialog } from "@lib/store/auth-dialog";
 import { loginSchema, LoginData } from "@ekitab/shared/validation/auth";
+import config from "@/config";
+import { useAuth } from "@lib/store/auth";
+import Spinner from "@ui/Spinner";
 
-type Props = {};
+type Props = {
+    email: string;
+    setEmail: (email: string) => void;
+};
 
-function LoginForm({}: Props) {
-    const { register, handleSubmit, formState: { errors }, setError } = useForm<LoginData>({
+function LoginForm({ email, setEmail }: Props) {
+    const { register, handleSubmit, formState: { errors } } = useForm<LoginData>({
         resolver: zodResolver(loginSchema),
         mode: "onTouched",
         reValidateMode: "onChange"
     });
-    const authDialog = useAuthDialog()
+    const authDialog = useAuthDialog();
+    const auth = useAuth();
 
-    const onSubmit = (data: LoginData) => {
-        console.log(data)
-        setError("root", { type: "manual", message: "Invalid login credentials" });
+    const [loading, setLoading] = useState(false);
+
+    const onSubmit = async (data: LoginData) => {
+        setLoading(true);
+        try {
+            const res = await axios.post(config.API_URL + "/login", data, {
+                withCredentials: true,
+            });
+
+            setLoading(false);
+            setEmail("");
+            toast.success("Logged in successfully");
+            auth.login(res.data.data);
+            authDialog.setOpen(false);
+        } catch(e: any) {
+            setLoading(false);
+            const errorMessage = e.response?.data?.message || "Failed to connect to server";
+            toast.error(errorMessage);
+        }
     };
 
     return (
@@ -32,7 +58,11 @@ function LoginForm({}: Props) {
                                 <Input
                                     type="email"
                                     placeholder="Email"
+                                    autoComplete="email"
                                     {...register("email")}
+                                    disabled={loading}
+                                    value={email}
+                                    onChange={(e) => setEmail(e.currentTarget.value)}
                                 />
                                 {errors.email && (
                                     <span className="text-sm text-red-500">{errors.email.message}</span>
@@ -43,7 +73,9 @@ function LoginForm({}: Props) {
                                 <PasswordInput
                                     className="peer"
                                     placeholder="Password"
+                                    autoComplete="current-password"
                                     {...register("password")}
+                                    disabled={loading}
                                 />
                                 {errors.password && (
                                     <span className="text-sm text-red-500">{errors.password.message}</span>
@@ -51,9 +83,9 @@ function LoginForm({}: Props) {
                             </Form.Field>
                         </div>
                         <div>
-                            {errors.root && (
+                            {/* {errors.root && (
                                 <span className="text-sm text-red-500">{errors.root.message}</span>
-                            )}
+                            )} */}
                         </div>
                         <div className="flex justify-center">
                             <div className="text-primary cursor-pointer" onClick={() => authDialog.setMode("forgot-password")}>
@@ -62,8 +94,10 @@ function LoginForm({}: Props) {
                         </div>
                     </div>
                     <Form.Submit asChild>
-                        <Button className="w-full bg-primary text-white mt-2">
-                            Login
+                        <Button className="w-full bg-primary text-white mt-2"
+                            disabled={loading}
+                        >
+                            {loading ? <Spinner/> : "Login"}
                         </Button>
                     </Form.Submit>
                 </div>

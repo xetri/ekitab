@@ -1,23 +1,40 @@
+import axios from "axios";
 import { Form } from "radix-ui";
 import { Button } from '@radix-ui/themes';
-import { useAuthDialog } from '@lib/store/auth-dialog'
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "react-toastify";
+import config from "@/config";
+import { useAuthDialog } from '@lib/store/auth-dialog'
 import Input from "@ui/Input";
 import { ForgotPasswordData, forgotPasswordSchema } from "@ekitab/shared/validation/auth";
 
-type Props = {}
+type Props = {
+    email: string;
+    setEmail: (email: string) => void;
+}
 
-function ForgotPasswordForm({}: Props) {
-  const { register, handleSubmit, formState: { errors }, setError } = useForm<ForgotPasswordData>({
+function ForgotPasswordForm({ email, setEmail }: Props) {
+  const { register, handleSubmit, formState: { errors }, setError, clearErrors } = useForm<ForgotPasswordData>({
       resolver: zodResolver(forgotPasswordSchema),
       mode: "onSubmit",
       reValidateMode: "onSubmit"
   });
   const authDialog = useAuthDialog();
 
-  const onSubmit = (data : ForgotPasswordData) => {
-    console.log(data)
+  const onSubmit = async (data : ForgotPasswordData) => {
+    clearErrors("root");
+    
+    try {
+      await axios.post(config.API_URL + "/reset-password", data, {
+        withCredentials: true,
+      });
+      authDialog.setMode("login");
+      toast.info("Check your email for the reset link");
+    } catch(e: any) {
+      const errorMessage = e.response?.data?.message || "Failed to connect to server";
+      toast.error(errorMessage);
+    }
   }
 
   return (<>
@@ -29,6 +46,8 @@ function ForgotPasswordForm({}: Props) {
               type="email"
               placeholder="Email"
               {...register("email")}
+              value={email}
+              onChange={(e) => setEmail(e.currentTarget.value)}
               />
               {errors.email && (
                 <span className="text-sm text-red-500">{errors.email.message}</span>

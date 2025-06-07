@@ -1,17 +1,20 @@
+import { useState } from "react";
 import { Dialog, Tabs } from "radix-ui";
 import { Cross1Icon } from "@radix-ui/react-icons";
-import { Button } from "@radix-ui/themes";
-
 import { AuthMode, useAuthDialog } from "@lib/store/auth-dialog";
 import LoginForm from "@ui/LoginForm";
 import SignupForm from "@ui/SignupForm";
 import ForgotPasswordForm from "@ui/ForgotPasswordForm";
+import { useAuth } from "@lib/store/auth";
 
-export default function LoginModalButton() {
+export default function AuthModal() {
     const authDialog = useAuthDialog();
+    const auth = useAuth();
+
+    const [email, setEmail] = useState<string>("");
 
     return <>
-        <Dialog.Root open={authDialog.isOpen} 
+        <Dialog.Root open={!auth.loggedIn && authDialog.isOpen} 
             onOpenChange={
                 (open) => {
                     if (authDialog.mode == "forgot-password") authDialog.setMode("login")
@@ -19,19 +22,13 @@ export default function LoginModalButton() {
                 }
             }
         >
-            <Dialog.Trigger asChild>
-              <Button className="bg-primary text-white">
-                  Login
-              </Button>
-            </Dialog.Trigger>
-
             <Dialog.Portal>
-                <Dialog.Overlay className="fixed inset-0 bg-black/50" 
+                <Dialog.Overlay className="fixed inset-0 bg-black/50 z-100" 
                     onPointerDown={(e) => e.stopPropagation()}
                 />
 
                 <Dialog.Content 
-                    className="fixed top-1/2 left-1/2 max-w-md w-full max-sm:max-w-[90%] -translate-x-1/2 -translate-y-1/2 bg-white p-6 shadow-lg rounded-md"
+                    className="fixed top-1/2 left-1/2 z-150 max-w-md w-full max-sm:max-w-[90%] -translate-x-1/2 -translate-y-1/2 bg-white p-6 shadow-lg rounded-md"
                     onEscapeKeyDown={(e) => e.preventDefault()}
                     onPointerDownOutside={(e) => e.preventDefault()}
                 >
@@ -68,15 +65,15 @@ export default function LoginModalButton() {
                             </Tabs.List>
                             <div className="mt-4">
                                 <Tabs.Content value="login">
-                                    <LoginForm />
+                                    <LoginForm email={email} setEmail={setEmail} />
                                 </Tabs.Content>
                                 <Tabs.Content value="signup">
-                                    <SignupForm />
+                                    <SignupForm email={email} setEmail={setEmail} />
                                 </Tabs.Content>
                             </div>
                     </Tabs.Root>
                     ) : 
-                        <ForgotPasswordForm/>
+                        <ForgotPasswordForm email={email} setEmail={setEmail}/>
                     }
                 </Dialog.Content>
             </Dialog.Portal>
