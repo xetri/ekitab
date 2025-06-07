@@ -14,3 +14,12 @@ export const genSessionId = () : string => {
 export const genOrderId = () => {
 
 }
+
+export const genBookId = () : string => {
+    const hexBytes = randomBytes(32).toString("hex");
+    const timestamp = Date.now().toString(16);
+    const hexBytesWithTimestamp = hexBytes + timestamp;
+    const id = createHash("sha256").update(hexBytesWithTimestamp).digest("hex");
+
+    return id;
+}

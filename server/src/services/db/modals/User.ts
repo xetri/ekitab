@@ -1,10 +1,9 @@
-import { Entity, Column, PrimaryColumn, CreateDateColumn, UpdateDateColumn, OneToMany } from "typeorm";
-import { Session } from "@/modals";
+import { Entity, Column, PrimaryColumn, CreateDateColumn, UpdateDateColumn } from "typeorm";
 
 @Entity("users")
 export class User {
     @PrimaryColumn()
-    uid: string;
+    id: string;
 
     @Column()
     name: string;
@@ -14,9 +13,6 @@ export class User {
 
     @Column()
     passwordHash: string;
-
-    @OneToMany(() => Session, (session) => session.user)
-    sessions: Session[];
 
     @CreateDateColumn()
     createdAt: Date;

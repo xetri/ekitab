@@ -16,6 +16,7 @@
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "minio": "^8.0.5",
+    "multer": "^2.0.0",
     "pg": "^8.15.6",
     "reflect-metadata": "^0.2.2",
     "typeorm": "^0.3.23",

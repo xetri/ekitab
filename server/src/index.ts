@@ -1,9 +1,7 @@
-import "reflect-metadata";
-
+import { createServer } from "http";
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import { createServer } from "http";
 
 import config from "@/config";
 import db from "@services/db";
@@ -12,8 +10,11 @@ import api from "@/routes";
 const app = express();
 const server = createServer(app);
 
-app.use(cors());
 app.use(express.json());
+app.use(cors({
+    origin: config.CLIENT_URL,
+    credentials: true,
+}));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 

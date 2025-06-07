@@ -11,9 +11,6 @@
     "setup": "concurrently \"npm run setup:client\" \"npm run setup:server\"",
     "setup:client": "cd client && npm install",
     "setup:server": "cd server && npm install",
-    "dev": "concurrently \"npm run dev:client\" \"npm run dev:server\"",
-    "dev:client": "cd client && npm run dev",
-    "dev:server": "cd server && npm run dev",
     "build": "concurrently \"npm run build:client\" \"npm run build:server\"",
     "build:client": "cd client && npm run build",
     "build:server": "cd server && npm run build"

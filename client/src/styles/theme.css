@@ -1,5 +1,8 @@
 @theme {
-    --color-primary: #008AE6;
-    --color-secondary: #FF6F00;
+    --color-primary: #FF6F00;
+    --color-secondary: #003673;
+    --color-tertiary: #0A0202;
     --color-accent: #FF4081;
+    --color-hero: #003673;
+    --color-neutral: #F2FCFF;
 }

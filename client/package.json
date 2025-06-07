@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "start": "vite",
-    "dev": "vite dev",
+    "dev": "vite dev --host",
     "build": "vite build --base ./",
     "preview": "vite preview"
   },
@@ -15,11 +15,15 @@
     "@radix-ui/themes": "^3.2.1",
     "axios": "^1.9.0",
     "dotenv": "^16.3.1",
+    "lucide-react": "^0.511.0",
     "radix-ui": "^1.4.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.56.3",
+    "react-icons": "^5.5.0",
+    "react-rating": "^2.0.5",
     "react-router-dom": "^6.16.0",
+    "react-toastify": "^11.0.5",
     "zod": "^3.24.4",
     "zustand": "^4.3.8"
   },
