@@ -4,6 +4,8 @@ import login from "@services/auth/login";
 import register from "@services/auth/signup";
 import resetPassword from "@services/auth/reset-password";
 import verify from "@services/auth/verify";
+import db from "@/services/db";
+import { User } from "@db/modals";
 import { forgotPasswordSchema, loginSchema, signupSchema } from "@ekitab/shared/validation/auth";
 
 const app = express();
@@ -78,8 +80,21 @@ app.get("/me", async (req, res) => {
         return;
     }
 
+    
     const { error, data } = verify(sessionToken);
     if (!error) {
+        const users = db.getRepository(User);
+        
+        const user = await users.findOneBy({ id: data.id });
+        if (!user) {
+            res.status(404).send({
+                message: "User not found"
+            });
+            res.cookie(config.SESSION_COOKIE_KEY, "");
+            
+            return;
+        }
+
         res.send({
             error,
             data

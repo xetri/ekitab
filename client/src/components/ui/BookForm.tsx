@@ -2,18 +2,21 @@ import { Book } from "@lib/types";
 import { useState } from "react";
 
 interface BookFormProps {
-  onSubmit: (newBook : Book) => void;
-  publisherId: string;
+  onSubmit: (newBook : Book, coverImage: File, bookFile: File) => void;
   initialData?: {
     title?: string;
+    description?: string;
+    author?: string;
     price?: number;
     categories?: string[];
   };
 }
 
-export default function BookForm({ onSubmit, publisherId, initialData }: BookFormProps) {
+export default function BookForm({ onSubmit, initialData }: BookFormProps) {
   const [formData, setFormData] = useState({
     title: initialData?.title || "",
+    description: initialData?.description || "",
+    author: initialData?.author || "",
     price: initialData?.price?.toString() || "",
     categories: (initialData?.categories || []).join(", "),
   });
@@ -21,7 +24,7 @@ export default function BookForm({ onSubmit, publisherId, initialData }: BookFor
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [pdfFile, setPdfFile] = useState<File | null>(null);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -29,19 +32,19 @@ export default function BookForm({ onSubmit, publisherId, initialData }: BookFor
     e.preventDefault();
 
     const newBook: Book = {
-      id: "",
+      id: "", // This will be set by the backend
       title: formData.title.trim(),
+      author: formData.author.trim(),
+      description: formData.description.trim(),
       price: parseFloat(formData.price),
       categories: formData.categories.split(",").map((cat) => cat.trim()),
-      coverFile,
-      pdfFile,
-      publisherId,
+      sellerId: "", // This will be set by the backend from the session
     };
 
-    onSubmit(newBook);
-    setFormData({ title: "", price: "", categories: "" });
-    setCoverFile(null);
-    setPdfFile(null);
+    onSubmit(newBook, coverFile as File, pdfFile as File);
+    // setFormData({ title: "", price: "", description: "", categories: "", author: "" });
+    // setCoverFile(null);
+    // setPdfFile(null);
   };
 
   return (
@@ -64,16 +67,44 @@ export default function BookForm({ onSubmit, publisherId, initialData }: BookFor
         />
       </div>
 
+      {/* Author */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Author</label>
+        <input
+          name="author"
+          value={formData.author}
+          onChange={handleChange}
+          required
+          placeholder="Author name"
+          className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary focus:border-primary"
+        />
+      </div>
+
       {/* Price */}
       <div>
         <label className="block text-sm font-medium text-gray-700">Price (NPR)</label>
         <input
           name="price"
           type="number"
+          min="0"
           value={formData.price}
           onChange={handleChange}
           required
           placeholder="999"
+          className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary focus:border-primary"
+        />
+      </div>
+
+      {/* Description */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Description</label>
+        <textarea
+          name="description"
+          value={formData.description}
+          onChange={handleChange}
+          required={true}
+          placeholder="Brief description of the book"
+          rows={3}
           className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary focus:border-primary"
         />
       </div>
@@ -83,7 +114,8 @@ export default function BookForm({ onSubmit, publisherId, initialData }: BookFor
         <label className="block text-sm font-medium text-gray-700">Upload Cover Image</label>
         <input
           type="file"
-          accept="image/*"
+          accept="image/jpg,image/jpeg"
+          required={true}
           onChange={(e) => setCoverFile(e.target.files?.[0] || null)}
           className="mt-1 block w-full text-sm"
         />
@@ -126,7 +158,7 @@ export default function BookForm({ onSubmit, publisherId, initialData }: BookFor
           type="submit"
           className="w-full bg-primary text-white text-sm font-medium py-2 rounded-lg hover:bg-[#FFA94D] transition"
         >
-          Upload Book
+          Upload
         </button>
       </div>
     </form>

@@ -1,66 +1,43 @@
-import { useState } from "react";
-import { Search } from "lucide-react";
+import fuse from "fuse.js";
+import axios from "axios";
+import { useEffect, useState } from "react";
 import BookCard from "@ui/BookCard";
 import { Book } from "@lib/types";
+import config from "@/config";
 
 type Props = {}
 
-const books : Book[] = [
-  {
-    id: "book-1",
-    title: "Atomic Habits",
-    price: 850,
-    imgUrl: "https://images.unsplash.com/photo-1553729459-efe14ef6055d",
-    publisherId: "publisher-1",
-    categories: ["Self-Help", "Productivity"],
-  },
-  {
-    id: "book-2",
-    title: "The Subtle Art of Not Giving a F*ck",
-    price: 999,
-    imgUrl: "https://images.unsplash.com/photo-1512820790803-83ca734da794",
-    publisherId: "publisher-2",
-    categories: ["Self-Help", "Motivation"],
-  },
-  {
-    id: "book-3",
-    title: "Deep Work",
-    price: 1200,
-    imgUrl: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f",
-    publisherId: "publisher-3",
-    categories: ["Self-Help", "Productivity"],
-  },
-  {
-    id: "book-4",
-    title: "The Psychology of Money",
-    price: 780,
-    imgUrl: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c",
-    publisherId: "publisher-4",
-    categories: ["Finance", "Self-Help"],
-  },
-  {
-    id: "book-5",
-    title: "Rich Dad Poor Dad",
-    price: 890,
-    imgUrl: "https://images.unsplash.com/photo-1516979187457-637abb4f9353",
-    publisherId: "publisher-5",
-    categories: ["Finance", "Self-Help"],
-  },
-  {
-    id: "book-6",
-    title: "Clean Code",
-    price: 1300,
-    imgUrl: "https://images.unsplash.com/photo-1553729459-efe14ef6055d",
-    publisherId: "publisher-6",
-    categories: ["Programming", "Software Development"],
-  },
-]
-
 function Home({}: Props) {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [fetching, setFetching] = useState(true);
 
-  const handleSearch = () => {
-    console.log("Searching for:", searchQuery);
+  const [fetchedBooks, setFetchedBooks] = useState<Book[]>([]);
+  const [books, setBooks] = useState<Book[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      const res = await axios.get(config.API_URL + "/books", {
+        withCredentials: true,
+      });
+      
+      setFetchedBooks(res.data as Book[]);
+      setBooks(res.data);
+      setFetching(false);
+    })();
+  }, []);
+
+  const fuseInstance = new fuse(fetchedBooks, {
+    keys: ["title", "categories", "author"],
+    threshold: 0.3,
+  });
+
+  const handleSearch = (query: string) => {
+    if (!query.trim()) {
+      setBooks(fetchedBooks);
+      return;
+    }
+
+    const results = fuseInstance.search(query);
+    setBooks(results.map(result => result.item));
   }
 
   return (<>
@@ -69,37 +46,53 @@ function Home({}: Props) {
 
       {/* Search Bar */}
       <div className="mb-10 flex justify-center">
-        <div className="relative w-full max-w-xl">
           {/* Input Field */}
           <input
             type="text"
             placeholder="Search by title or category..."
             className="w-full pl-4 pr-12 py-3 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
+            onChange={(e) => handleSearch(e.target.value)}
           />
-
-          {/* Icon Button on the right */}
-          <button
-            onClick={handleSearch}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-primary"
-          >
-            <Search className="h-5 w-5" />
-          </button>
-        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {
+          fetching && (
+              [...Array(4)].map((_, i) => (
+                <div key={i} className="bg-white rounded-xl shadow p-4 space-y-2">
+                  <div className="w-full aspect-[16/9] bg-gray-200 rounded-md"></div>
+                  <div className="h-5 bg-gray-200 rounded w-3/4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+                  <div className="flex flex-wrap gap-1">
+                    <div className="bg-gray-200 h-4 w-12 rounded"></div>
+                    <div className="bg-gray-200 h-4 w-16 rounded"></div>
+                    <div className="bg-gray-200 h-4 w-10 rounded"></div>
+                  </div>
+                </div>
+              ))
+          )
+        }
+        {
+          (books.length === 0 && !fetching) && (
+            <div className="col-span-4 text-center text-gray-500">
+              No books found
+            </div>
+          )
+        }
         {books.map((book) => (
           <BookCard
             key={book.id}
             id={book.id}
+            description={book.description}
+            author={book.author}
             title={book.title}
             price={book.price}
-            imgUrl={book.imgUrl}
-            publisherId={book.publisherId}
+            sellerId={book.sellerId}
+            sellerName={book.sellerName}
             categories={book.categories}
+            createdAt={book.createdAt}
+            updatedAt={book.updatedAt}
           />
         ))}
       </div>

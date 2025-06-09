@@ -1,7 +1,7 @@
 import { DataSource, DataSourceOptions } from "typeorm";
 import config from "@/config";
 
-import { User, Book } from "@db/modals";
+import { User, Book, Review, Order } from "@db/modals";
 
 const dsConfig : DataSourceOptions = {
     type: "postgres",
@@ -9,7 +9,7 @@ const dsConfig : DataSourceOptions = {
     synchronize: true,
     logging: false,
     ssl: config.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
-    entities: [User, Book],
+    entities: [User, Book, Review, Order],
 }
 
 const db = new DataSource(dsConfig);

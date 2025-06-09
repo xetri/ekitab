@@ -87,11 +87,11 @@ function LoginForm({ email, setEmail }: Props) {
                                 <span className="text-sm text-red-500">{errors.root.message}</span>
                             )} */}
                         </div>
-                        <div className="flex justify-center">
+                        {/* <div className="flex justify-center">
                             <div className="text-primary cursor-pointer" onClick={() => authDialog.setMode("forgot-password")}>
                                 Forgot Password ?
                             </div>
-                        </div>
+                        </div> */}
                     </div>
                     <Form.Submit asChild>
                         <Button className="w-full bg-primary text-white mt-2"

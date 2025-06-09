@@ -8,6 +8,7 @@ COPY . .
 
 ENV NODE_ENV=${NODE_ENV:-production}
 ENV VITE_API_URL=${VITE_API_URL:-http://localhost:8000}
+ENV VITE_CDN_URL=${VITE_CDN_URL:-http://localhost:9000}
 
 RUN npm run build
 

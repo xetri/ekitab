@@ -4,7 +4,7 @@ import { Cross1Icon } from "@radix-ui/react-icons";
 import { AuthMode, useAuthDialog } from "@lib/store/auth-dialog";
 import LoginForm from "@ui/LoginForm";
 import SignupForm from "@ui/SignupForm";
-import ForgotPasswordForm from "@ui/ForgotPasswordForm";
+// import ForgotPasswordForm from "@ui/ForgotPasswordForm";
 import { useAuth } from "@lib/store/auth";
 
 export default function AuthModal() {
@@ -17,7 +17,7 @@ export default function AuthModal() {
         <Dialog.Root open={!auth.loggedIn && authDialog.isOpen} 
             onOpenChange={
                 (open) => {
-                    if (authDialog.mode == "forgot-password") authDialog.setMode("login")
+                    // if (authDialog.mode == "forgot-password") authDialog.setMode("login")
                     authDialog.setOpen(open)
                 }
             }
@@ -36,14 +36,14 @@ export default function AuthModal() {
                         <Dialog.Title className="text-xl font-semibold">
                             {(authDialog.mode == "login") && "Login to your account"}
                             {(authDialog.mode == "signup") && "Create a new account"}
-                            {(authDialog.mode == "forgot-password") && "Reset Password"}
+                            {/* {(authDialog.mode == "forgot-password") && "Reset Password"} */}
                         </Dialog.Title>
                         <Dialog.Close>
                             <Cross1Icon/>
                         </Dialog.Close>
                     </div>
                     
-                    { authDialog.mode != "forgot-password" ? (
+                    {/* { authDialog.mode != "forgot-password" ? ( */}
                     <Tabs.Root
                         defaultValue={authDialog.mode}
                         onValueChange={(val) => authDialog.setMode(val as AuthMode)}
@@ -72,8 +72,9 @@ export default function AuthModal() {
                                 </Tabs.Content>
                             </div>
                     </Tabs.Root>
-                    ) : 
-                        <ForgotPasswordForm email={email} setEmail={setEmail}/>
+                    {
+                    // ) : 
+                    //     <ForgotPasswordForm email={email} setEmail={setEmail}/>
                     }
                 </Dialog.Content>
             </Dialog.Portal>

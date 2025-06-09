@@ -1,37 +1,40 @@
-import { useState } from "react";
+import axios from "axios";
+import { useEffect, useState } from "react";
 import { Button } from "@radix-ui/themes";
 import { toast } from "react-toastify";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { Star } from "lucide-react";
 import { Book, Review } from "@lib/types";
-
-const mockBook: Book = {
-  id: "123",
-  title: "Mastering TypeScript for React",
-  price: 899,
-  // imgUrl: "https://images.unsplash.com/photo-1553729459-efe14ef6055d",
-  publisherId: "456",
-  categories: ["Programming", "Frontend"],
-};
+import NotFound from "@pages/404";
+import config from "@/config";
+import { useAuth } from "@/lib/store/auth";
+import Spinner from "../ui/Spinner";
+import { Cross1Icon } from "@radix-ui/react-icons";
 
 export default function BookPage() {
+  const [fetching, setFetching] = useState(true);
   const { bookId } = useParams<{ bookId: string }>();
-  const book = mockBook;
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [book, setBook] = useState<Book>();
+  const self = useAuth();
 
-  const [reviews, setReviews] = useState<Review[]>([
-    {
-      id: 1,
-      user: "Sujan B.",
-      rating: 5,
-      comment: "Excellent book for TypeScript beginners!",
-    },
-    {
-      id: 2,
-      user: "Aarati T.",
-      rating: 4,
-      comment: "Well-structured and very helpful for React devs.",
-    },
-  ]);
+  useEffect(() => {
+    try {
+      (async () => {
+          const res = await axios.get(config.API_URL + `/books/${bookId}`, {
+            withCredentials: true,
+          });
+          const { book, reviews } = res.data as { book: Book, reviews: Review[] };
+          setBook(book);
+          setReviews(reviews);
+          setFetching(false);
+        })();
+    } catch (error) {
+      console.error("Error fetching book:", error);
+      toast.error("Failed to fetch book details.");
+      setFetching(false);
+    }
+  }, []);
 
   const [newRating, setNewRating] = useState(0);
   const [newComment, setNewComment] = useState("");
@@ -42,12 +45,30 @@ export default function BookPage() {
       return;
     }
 
+    const now = new Date(Date.now());
     const newReview: Review = {
-      id: Date.now(),
-      user: "You",
+      id: bookId as string,
+      user: self.user?.uid as string,
+      name: self.user?.name as string,
       rating: newRating,
       comment: newComment,
+      bookId: "",
+      createdAt: now,
+      updatedAt: now,
     };
+    
+    try {
+      const res = axios.post(config.API_URL + "/books/review", {
+        id: bookId,
+        rating: newRating,
+        comment: newComment,
+      }, {
+        withCredentials: true,
+      })
+    } catch(e) {
+      toast.error("Failed to review!")
+      return;
+    }
 
     setReviews((prev) => [newReview, ...prev]);
     setNewRating(0);
@@ -55,8 +76,18 @@ export default function BookPage() {
     toast.success("Thank you for your review!");
   };
 
-  const averageRating =
-    reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+  const removeReview = async (id: string) => {
+    try {
+      const res = await axios.delete(config.API_URL + "/books/review/" + id, {
+        withCredentials: true,
+      });
+
+      setReviews(reviews.filter((review) => review.id != id));
+    } catch(e) {
+    }
+  }
+
+  const averageRating = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
 
   const renderStars = (rating: number) => {
     const rounded = Math.round(rating);
@@ -70,39 +101,66 @@ export default function BookPage() {
           />
         ))}
         <span className="text-sm text-gray-600 ml-2">
-          {rating.toFixed(1)} ({reviews.length} review{reviews.length > 1 ? "s" : ""})
+          {rating.toFixed(1) != "NaN" ? rating.toFixed(1) : "None"} ({reviews.length} review{reviews.length > 1 ? "s" : ""})
         </span>
       </div>
     );
   };
 
-  const handleBuyNow = () => {
-    toast.info("Redirecting to payment...");
-    // Redirect to payment page or handle payment logic here
-  };
+  if (fetching) {
+    return (
+      <div className="mt-5">
+        <Spinner/>
+      </div>
+    )
+  }
 
-  const handleAddToCart = () => {
-    toast.info("Added to cart");
-    // Add to cart logic here
-  };
+  if (!book) {
+    return (
+      <NotFound/>
+    );
+  }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-10 space-y-12">
+    <div className="max-w-4xl mx-auto px-4 py-5 space-y-12">
       {/* Book Details */}
       <div className="grid md:grid-cols-2 gap-10">
         <div className="rounded-xl overflow-hidden shadow-lg">
           <img
-            // src={book.imgUrl}
+            src={config.CDN_URL + `/${book.id}_cover.jpg`}
             alt={book.title}
             className="aspect-[16/9] w-full h-full object-cover"
           />
         </div>
 
-        <div className="space-y-6">
-          <h1 className="text-3xl font-bold text-gray-900">{book.title}</h1>
-          <p className="text-xl font-semibold text-gray-800">
-            NPR {book.price.toLocaleString()}
+        <div className="space-y-2">
+          <h1 className="text-2xl font-bold text-gray-900">{book.title}</h1>
+          <p className="text-sm text-gray-500">by {book.author}</p>
+
+          {/* ✅ Seller info */}
+          <p className="text-sm text-gray-600">
+              Publisher: {" "}
+            <Link to={`/publisher/${book.sellerId}`}
+              className="text-primary font-medium hover:underline"
+              >
+              {book.sellerName}
+            </Link>
           </p>
+
+          {/* ✅ Published Date */}
+          <div>
+            <span className="text-sm text-gray-500">
+              {new Date(book.createdAt).toLocaleDateString("en-GB", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </span>
+          </div>
+
+          {/* <p className="text-xl font-semibold text-gray-800">
+            NPR {book.price}
+          </p> */}
           <div>{renderStars(averageRating)}</div>
 
           <div className="flex flex-wrap gap-2">
@@ -118,16 +176,14 @@ export default function BookPage() {
 
           <div className="flex gap-4 pt-2">
             <Button
-              onClick={handleAddToCart}
-              className="flex-1 py-2 text-sm rounded-xl bg-gray-100 hover:bg-gray-200"
-            >
-              Add to Cart
-            </Button>
-            <Button
-              onClick={handleBuyNow}
+              onClick={() => {
+                const a = document.createElement("a");
+                a.href = `${config.CDN_URL}/${book.id}_book.pdf`;
+                a.click();
+              }}
               className="flex-1 py-2 text-sm rounded-xl bg-primary text-white hover:bg-[#FFA94D]"
             >
-              Buy Now
+              Download
             </Button>
           </div>
         </div>
@@ -177,7 +233,23 @@ export default function BookPage() {
               className="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-2"
             >
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-800">{review.user}</span>
+                <div className="flex flex-col">
+                  <div className="flex gap-1 items-center">
+                    {self.user?.uid == review.user &&
+                    <div className="text-[#ff0000]">
+                      <Cross1Icon className="cursor-pointer" onClick={async (e) => { await removeReview(review.id) } }/>
+                    </div>
+                    }
+                    <div className="flex text-sm text-primary">{review.name}</div>
+                  </div>
+                  <span className="flex text-gray-500 text-sm">  
+                    {new Date(book.createdAt).toLocaleDateString("en-GB", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </span>
+                </div>
                 <div className="flex gap-1">
                   {[1, 2, 3, 4, 5].map((i) => (
                     <Star
@@ -191,7 +263,7 @@ export default function BookPage() {
                   ))}
                 </div>
               </div>
-              <p className="text-sm text-gray-700">{review.comment}</p>
+              <p className="text-sm mt-5 text-gray-900">{review.comment}</p>
             </div>
           ))
         )}

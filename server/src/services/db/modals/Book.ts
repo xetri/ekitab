@@ -4,37 +4,33 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   PrimaryColumn,
-} from 'typeorm';
-
+} from "typeorm";
 
 @Entity("books")
 export class Book {
   @PrimaryColumn()
   id: string;
 
-  @Column()
+  @Column( { nullable: true } )
   title: string;
 
-  @Column()
+  @Column( { nullable: true} )
   author: string;
 
   @Column({ nullable: true })
   description: string;
 
-  @Column({ type: 'text', array: true })
+  @Column({ type: 'text', array: true, nullable: true })
   categories: string[];
 
-  @Column({ type: 'float' })
+  @Column({ type: 'float', nullable: true })
   price: number;
 
-  @Column()
+  @Column({ nullable: true })
   sellerId: string;
 
   @Column({ nullable: true })
-  language: string;
-
-  @Column({ type: 'int', nullable: true })
-  pages: number;
+  sellerName: string;
 
   @CreateDateColumn()
   createdAt: Date;

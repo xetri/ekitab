@@ -1,25 +1,20 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@radix-ui/themes";
-import { toast } from "react-toastify";
 import { Book } from "@lib/types";
+import config from "@/config";
 
 interface Props extends Book {}
 
-function BookCard({ id, title, price, imgUrl, publisherId, categories }: Props) {
+function BookCard({ id, title, price, author, categories }: Props) {
   const navigate = useNavigate();
 
   const handleCardClick = () => {
     navigate(`/book/${id}`);
   };
 
-  const handleAddToCart = (e: React.MouseEvent) => {
+  const handleView = (e: React.MouseEvent) => {
     e.stopPropagation();
-    toast.info("Added to cart!");
-  };
-
-  const handleBuyNow = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    navigate(`/buy/${id}`);
+    navigate(`/book/${id}`);
   };
 
   return (<div 
@@ -30,11 +25,11 @@ function BookCard({ id, title, price, imgUrl, publisherId, categories }: Props) 
     <div className="group bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 w-full max-w-xs p-4 flex flex-col space-y-4">
       <div className="aspect-[16/9] overflow-hidden rounded-xl">
         <img
-          // src={imgUrl}
+          src={`${config.CDN_URL}/${id}_cover.jpg`}
+          loading="lazy"
           alt={title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          loading="lazy"
-      />
+        />
       </div>
 
       <div className="space-y-1">
@@ -54,6 +49,7 @@ function BookCard({ id, title, price, imgUrl, publisherId, categories }: Props) 
             </div>
           )}
         </div>
+          <p className="text-sm text-gray-500">by {author}</p>
           <p className="text-sm text-gray-800">NPR {price.toLocaleString()}</p>
 
            <div className="flex flex-wrap gap-1 mt-1">
@@ -70,18 +66,11 @@ function BookCard({ id, title, price, imgUrl, publisherId, categories }: Props) 
 
       <div className="flex gap-2 mt-auto">
         <Button 
-          className="flex-1 py-2 text-sm rounded-xl bg-gray-100 text-tertiary hover:bg-gray-200 transition-colors duration-200"
-          onClick={handleAddToCart}
-          aria-label="Add to Cart"
-          >
-          Add to Cart
-        </Button>
-        <Button 
-          className="flex-1 py-2 text-sm rounded-xl bg-primary text-white hover:bg-[#FFA94D] transition-colors duration-200"
-          onClick={handleBuyNow}
-          aria-label="Buy Now"
+          className="flex-1 py-2 text-sm rounded-xl border border-primary bg-neutral text-primary hover:bg-[#FFA94D] hover:text-white transition-colors duration-200"
+          onClick={handleView}
+          aria-label="View More"
         >
-          Buy Now
+          View More
         </Button>
       </div>
     </div>

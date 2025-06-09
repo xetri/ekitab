@@ -24,7 +24,12 @@ const App = () => {
                 const res = await axios.get(config.API_URL + "/me", {
                     withCredentials: true,
                 });
-                auth.login(res.data.data);
+                const user = res.data.data;
+                auth.login({
+                    uid: user.id,
+                    name: user.name,
+                    email: user.email,
+                });
                 auth.setLoading(false);
             } catch (e: any) {
                 auth.setLoading(false);
@@ -39,11 +44,11 @@ const App = () => {
             </div>
         ) :
     <>
-        <div className="min-h-screen flex flex-col bg-neutral">
+        <div className="min-h-screen bg-neutral">
             <AuthModal/>
             <Router>
                 <Navbar/>
-                <main className="flex-1 flex items-center justify-center bg-neutral">
+                <main className="bg-neutral">
                     <Routes>
                         <Route path="/" element={<Home/>} />
                         <Route path="/dashboard" element={<Dashboard/>} />
@@ -52,7 +57,7 @@ const App = () => {
                         <Route path="*" element={<NotFound/>}/>
                     </Routes>
                 </main>
-                <Footer/>
+                {/* <Footer/> */}
             </Router>
             <ToastContainer/>
         </div>

@@ -1,68 +1,31 @@
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Star } from "lucide-react";
 import { Book } from "@lib/types";
-
-const mockBooks: (Book & { rating: number })[] = [
-  {
-    id: "book1",
-    title: "Mastering TypeScript",
-    price: 999,
-    // imgUrl: "https://via.placeholder.com/400x250?text=Book+1",
-    publisherId: "pub123",
-    categories: ["Programming"],
-    rating: 4.2,
-  },
-  {
-    id: "book2",
-    title: "React Patterns Deep Dive",
-    price: 1299,
-    // imgUrl: "https://via.placeholder.com/400x250?text=Book+2",
-    publisherId: "pub123",
-    categories: ["Web Development"],
-    rating: 4.8,
-  },
-  {
-    id: "book3",
-    title: "Node.js Essentials",
-    price: 749,
-    // imgUrl: "https://via.placeholder.com/400x250?text=Book+3",
-    publisherId: "pub123",
-    categories: ["Backend Development"],
-    rating: 3.7,
-  },
-];
+import config from "@/config";
+import axios from "axios";
 
 export default function Publisher() {
   const navigate = useNavigate();
   const { publisherId } = useParams<{ publisherId: string }>();
-  const publisherBooks = mockBooks.filter((book) => book.publisherId === publisherId);
+  const [pubName, setPubName] = useState(publisherId);
+  const [publisherBooks, setPublisherBooks] = useState<Book[]>([]);
 
-  const avgRating =
-    publisherBooks.length > 0
-      ? publisherBooks.reduce((sum, book) => sum + book.rating, 0) / publisherBooks.length
-      : 0;
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await axios.get(`${config.API_URL}/books/publisher/${publisherId}`);
+
+        setPubName(res.data.publisherName);
+        setPublisherBooks(res.data.books);
+      } catch(e) {
+      }
+    })()
+
+  }, [])
 
   const onBookClick = (book: Book) => {
-    navigate(`/books/${book.id}`, {
-      state: { book },
-    });
+    navigate(`/book/${book.id}`);
   }
-
-  const renderStars = (rating: number) => {
-    const fullStars = Math.round(rating); // round to nearest whole number
-    return (
-      <div className="flex gap-1 items-center text-yellow-500">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <Star
-            key={i}
-            size={16}
-            className={i < fullStars ? "fill-yellow-500" : "fill-none"}
-          />
-        ))}
-        <span className="text-sm text-gray-600 ml-1">({rating.toFixed(1)})</span>
-      </div>
-    );
-  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
@@ -72,14 +35,9 @@ export default function Publisher() {
           {publisherId?.charAt(0).toUpperCase()}
         </div>
         <h1 className="mt-5 text-4xl font-extrabold text-gray-900">
-          Books by {publisherId}
+          {pubName}
         </h1>
-        <p className="text-gray-500 text-sm mt-1">All books published by this user</p>
-
-        {/* Average Rating */}
-        {publisherBooks.length > 0 && (
-          <div className="mt-3">{renderStars(avgRating)}</div>
-        )}
+        <p className="text-gray-500 text-sm mt-3">Publications</p>
       </div>
 
       {/* Book Grid */}
@@ -91,9 +49,9 @@ export default function Publisher() {
               className="bg-white rounded-2xl shadow-md overflow-hidden transition hover:shadow-lg cursor-pointer"
               onClick={(_) => onBookClick(book)}
             >
-              <div className="aspect-[16/9]">
+               <div className="aspect-[16/9] overflow-hidden rounded-xl">
                 <img
-                  // src={book.imgUrl}
+                  src={`${config.CDN_URL}/${book.id}_cover.jpg`}
                   alt={book.title}
                   className="aspect-[16/9] w-full h-full object-cover"
                 />
@@ -118,8 +76,6 @@ export default function Publisher() {
                 <p className="text-lg font-bold text-gray-800">
                   NPR {book.price.toLocaleString()}
                 </p>
-
-                <div className="text-yellow-500">{renderStars(book.rating)}</div>
 
                 <div className="flex gap-2 pt-1">
                   <button className="flex-1 bg-gray-100 text-gray-800 rounded-lg py-2 text-sm hover:bg-gray-200 transition font-medium">

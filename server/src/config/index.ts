@@ -18,6 +18,7 @@ const config = {
         accessKey: process.env.MINIO_ACCESS_KEY || "minioadmin",
         secretKey: process.env.MINIO_SECRET_KEY || "minioadmin",
     },
+    MINIO_BUCKET: process.env.MINIO_BUCKET || "ekitab",
 }
 
 export default config;

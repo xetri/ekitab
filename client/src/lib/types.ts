@@ -1,16 +1,23 @@
 export interface Book {
     id: string;
     title: string;
+    author: string;
+    description: string;
     price: number;
-    coverFile?: File | null;
-    pdfFile?: File | null;
-    publisherId: string;
+    sellerId: string;
+    sellerName: string;
     categories: string[];
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 export interface Review {
-  id: number;
+  id: string;
   user: string;
+  name: string;
   rating: number;
   comment: string;
+  bookId: string;
+  createdAt: Date;
+  updatedAt: Date;
 }

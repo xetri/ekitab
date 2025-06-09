@@ -1,4 +1,4 @@
-import minio from "minio";
+import * as minio from "minio";
 import config from "@/config";
 
 const minioClient = new minio.Client({
