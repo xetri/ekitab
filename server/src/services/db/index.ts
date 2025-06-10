@@ -1,7 +1,7 @@
 import { DataSource, DataSourceOptions } from "typeorm";
 import config from "@/config";
 
-import { User, Book, Review, Order } from "@db/modals";
+import { User, Book, Review } from "@db/modals";
 
 const dsConfig : DataSourceOptions = {
     type: "postgres",

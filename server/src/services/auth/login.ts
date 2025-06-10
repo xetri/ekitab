@@ -4,7 +4,7 @@ import config from "@/config";
 import db from "@services/db";
 import { User } from "@/services/db/modals";
 import { genSessionId } from "@utils/id";
-import { LoginData } from "@ekitab/shared/validation/auth";
+import { LoginData } from "@utils/validation/auth";
 
 export default async function login(data: LoginData, res: any) {
     let { email, password } = data;

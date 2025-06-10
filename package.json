@@ -5,15 +5,14 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
+    "preinstall": "concurrently \"cd client && npm install\" \"cd server && npm install\"",
     "start": "concurrently \"npm run client\" \"npm run server\"",
-    "client": "cd client && npm run build && npm run start",
-    "server": "cd server && npm run build && npm run start",
-    "setup": "concurrently \"npm run setup:client\" \"npm run setup:server\"",
-    "setup:client": "cd client && npm install",
-    "setup:server": "cd server && npm install",
-    "build": "concurrently \"npm run build:client\" \"npm run build:server\"",
-    "build:client": "cd client && npm run build",
-    "build:server": "cd server && npm run build"
+    "dev": "concurrently \"npm run db\" \"npm run cloud\"",
+    "build": "concurrently \"cd client && npm run build\" \"cd server && npm run build\"",
+    "db": "  docker run -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=ekitab -p 5432:5432 docker.io/postgres:15.2-alpine",
+    "cloud": "docker run -p 9000:9000 -p 9001:9001 -e \"MINIO_ACCESS_KEY=minioadmin\" -e \"MINIO_SECRET_KEY=minioadmin\" -e \"MINIO_ROOT_USER=minioadmin\" -e \"MINIO_ROOT_PASSWORD=minioadmin\" docker.io/minio/minio server --console-address \":9001\" /data",
+    "client": "cd client && npm run start",
+    "server": "cd server && npm run start"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"

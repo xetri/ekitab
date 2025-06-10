@@ -156,6 +156,45 @@ router.get("/:bookId", async (req, res) => {
     }
 });
 
+//@ts-ignore
+router.put("/:bookId", async (req, res) => {
+    const bookId = req.params.bookId;
+    const updatedBook = req.body as Book;
+
+    const booksRepo = db.getRepository(Book);
+
+    try {
+        const sessionToken = req.cookies[config.SESSION_COOKIE_KEY];
+        if (!sessionToken) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+        jwt.verify(sessionToken, config.JWT_SECRET_KEY);
+        const user = jwt.decode(sessionToken, config.JWT_SECRET_KEY);
+
+        const book = await booksRepo.findOne({
+            where: { id: bookId },
+        });
+
+        if (!book) {
+            return res.status(404).json({ message: "Book not found" });
+        }
+
+        if (user.id != book.sellerId) {
+            return res.status(403).json({ message: "Forbidden" });
+        }
+
+        book.title = updatedBook.title;
+        book.author = updatedBook.author;
+        book.description = updatedBook.description;
+        book.categories = updatedBook.categories;
+
+        await booksRepo.save(book);
+        res.json({ message: "Book updated successfully" });
+    } catch(e) {
+        res.status(500).json({ message: e.message });
+    }
+});
+
 // @ts-ignore
 router.delete("/:bookId", async (req, res) => {
     const bookId = req.params.bookId;

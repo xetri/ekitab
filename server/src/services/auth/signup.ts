@@ -4,8 +4,7 @@ import db from "@services/db";
 import { User } from "@/services/db/modals";
 import { genUserId, genSessionId } from "@utils/id";
 import { hashPassword } from "@/utils/hash";
-import { SignUpData } from "@ekitab/shared/validation/auth";
-import path from "path";
+import { SignUpData } from "@utils/validation/auth";
 
 export default async function register(data: SignUpData, res: any) {
     let { email, name, password } = data;

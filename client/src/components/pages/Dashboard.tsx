@@ -65,13 +65,15 @@ export default function Dashboard() {
 
   const handleBookEdit = async (updatedBook: Book) => {
     try {
+      updatedBook.id = String(currentEditBook?.id);
+
       await axios.put(`${config.API_URL}/books/${updatedBook.id}`, updatedBook, {
         withCredentials: true,
       });
+
       setPublishedBooks(prev =>
         prev.map(book => (book.id === updatedBook.id ? updatedBook : book))
       );
-
       setEditBook(false);
     } catch (e) {}
   };
