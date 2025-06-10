@@ -6,8 +6,8 @@
   "license": "MIT",
   "scripts": {
     "start": "concurrently \"npm run client\" \"npm run server\"",
-    "client": "cd client && npm run start",
-    "server": "cd server && npm run start",
+    "client": "cd client && npm run build && npm run start",
+    "server": "cd server && npm run build && npm run start",
     "setup": "concurrently \"npm run setup:client\" \"npm run setup:server\"",
     "setup:client": "cd client && npm install",
     "setup:server": "cd server && npm install",
