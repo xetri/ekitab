@@ -59,6 +59,7 @@ export default async function login(data: LoginData, res: any) {
 
     res.status(200).send({
         message: "Login success",
+        session: sessionKey,
         data: {
             id: user.id,
             email: user.email,

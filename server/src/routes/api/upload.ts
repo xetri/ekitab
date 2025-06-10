@@ -41,23 +41,22 @@ router.post("/book" , uploadMiddleware , async (req, res) => {
         }
 
         const bookRepo = db.getRepository(Book);
-        const bookData = {
+        const book = bookRepo.create({
             id,
             title: req.body.title || "Untitled",
             author: req.body.author || "N/A",
             description: req.body.description || "",
-            price: req.body.price || 0,
             sellerId: user.id,
             sellerName: user.name,
             categories: req.body.categories ? req.body.categories.split(",").map((cat: string) => cat.trim()) : [],
-        };
+        });
         
-        const response = await bookRepo.save(bookData);
+        const response = await bookRepo.save(book);
         if (!response) {
             return res.status(500).json({ error: "Failed to save book data." });
         }
 
-        return res.status(200).json({ message: "Files uploaded successfully." });
+        return res.status(200).json({ book: book, message: "Files uploaded successfully." });
     } catch (error) {
         console.error("Error uploading files:", error);
         res.status(500).json({ error: "An error occurred while uploading files." });

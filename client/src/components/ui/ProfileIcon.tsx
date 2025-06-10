@@ -1,36 +1,37 @@
-import { useState } from "react";
-import { useAuth } from "@lib/store/auth";
+import { useAuth } from "@/lib/store/auth";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@radix-ui/themes";
+import config from "@/config";
 
 
 export default function ProfileIcon() {
     const navigate = useNavigate();
     const auth = useAuth();
-    const [imageError, setImageError] = useState(false);
-    const userInitial = auth.user?.name[0].toUpperCase();
-    
-    return (
-    <div className="relative group text-primary">
-        <div className="w-10 h-10 rounded-full text-inherit bg-gray-300 flex items-center justify-center cursor-pointer"
-            onClick={() => {
-                navigate("/dashboard");
 
-                // logout();
-                // auth.logout();
-                // toast.success("Logged out successfully");
-            }}
-        >
-            {!imageError ?
-                <img 
-                    src="/path/to/profile-icon.png" 
-                    className="w-full h-full rounded-full"
-                    onError={() => setImageError(true)} 
-                /> : (
-                <span className="text-inherit text-lg font-bold">
-                    {userInitial}
-                </span>
-                )
-            }
+    const handleLogout = async () => {
+        try {
+            const res = await axios.delete(`${config.API_URL}/logout`, { withCredentials: true });
+            console.log(res);
+            auth.logout();
+        } catch(e) {
+        }
+    };
+
+    return (
+        <div className="flex items-center gap-2">
+            <Button
+                className="px-4 py-2 rounded-md bg-primary text-white hover:bg-primary/90 transition-colors font-medium"
+                onClick={() => navigate("/dashboard")}
+            >
+                Dashboard
+            </Button>
+            <Button
+                className="px-4 py-2 rounded-md border bg-amber-50 border-gray-300 text-gray-800 hover:bg-gray-100 transition-colors font-medium"
+                onClick={handleLogout}
+            >
+                Logout
+            </Button>
         </div>
-    </div>)
+    );
 }

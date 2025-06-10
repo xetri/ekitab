@@ -57,10 +57,11 @@ export default function Publisher() {
                 />
               </div>
 
-              <div className="p-5 space-y-3">
+              <div className="p-3 space-y-2">
                 <h3 className="text-xl font-semibold text-gray-900 truncate" title={book.title}>
                   {book.title}
                 </h3>
+                <p className="text-sm text-gray-500">{book.author}</p>
 
                 <div className="flex flex-wrap gap-2">
                   {book.categories.map((cat) => (
@@ -71,19 +72,6 @@ export default function Publisher() {
                       {cat}
                     </span>
                   ))}
-                </div>
-
-                <p className="text-lg font-bold text-gray-800">
-                  NPR {book.price.toLocaleString()}
-                </p>
-
-                <div className="flex gap-2 pt-1">
-                  <button className="flex-1 bg-gray-100 text-gray-800 rounded-lg py-2 text-sm hover:bg-gray-200 transition font-medium">
-                    Add to Cart
-                  </button>
-                  <button className="flex-1 bg-primary text-white rounded-lg py-2 text-sm hover:bg-[#FFA94D] transition font-medium">
-                    Buy Now
-                  </button>
                 </div>
               </div>
             </div>

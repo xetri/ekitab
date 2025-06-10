@@ -39,7 +39,7 @@ export default function BookPage() {
   const [newRating, setNewRating] = useState(0);
   const [newComment, setNewComment] = useState("");
 
-  const handleAddReview = () => {
+  const handleAddReview = async () => {
     if (newRating === 0 || newComment.trim() === "") {
       toast.error("Please provide both rating and comment.");
       return;
@@ -47,33 +47,35 @@ export default function BookPage() {
 
     const now = new Date(Date.now());
     const newReview: Review = {
-      id: bookId as string,
+      id: "",
       user: self.user?.uid as string,
       name: self.user?.name as string,
       rating: newRating,
       comment: newComment,
-      bookId: "",
+      bookId: bookId as string,
       createdAt: now,
       updatedAt: now,
     };
     
     try {
-      const res = axios.post(config.API_URL + "/books/review", {
+      const res = await axios.post(config.API_URL + "/books/review", {
         id: bookId,
         rating: newRating,
         comment: newComment,
       }, {
         withCredentials: true,
-      })
+      });
+
+      newReview.id = res.data.review.id;
+
+      setReviews((prev) => [newReview as Review, ...prev]);
+      setNewRating(0);
+      setNewComment("");
+      toast.success("Thank you for your review!");
     } catch(e) {
-      toast.error("Failed to review!")
+      toast.error("Failed to review!");
       return;
     }
-
-    setReviews((prev) => [newReview, ...prev]);
-    setNewRating(0);
-    setNewComment("");
-    toast.success("Thank you for your review!");
   };
 
   const removeReview = async (id: string) => {
@@ -81,9 +83,11 @@ export default function BookPage() {
       const res = await axios.delete(config.API_URL + "/books/review/" + id, {
         withCredentials: true,
       });
+      console.log(res);
 
       setReviews(reviews.filter((review) => review.id != id));
     } catch(e) {
+      console.log(e)
     }
   }
 
@@ -135,7 +139,7 @@ export default function BookPage() {
 
         <div className="space-y-2">
           <h1 className="text-2xl font-bold text-gray-900">{book.title}</h1>
-          <p className="text-sm text-gray-500">by {book.author}</p>
+          <p className="text-sm text-gray-500">{book.author}</p>
 
           {/* ✅ Seller info */}
           <p className="text-sm text-gray-600">
@@ -158,9 +162,6 @@ export default function BookPage() {
             </span>
           </div>
 
-          {/* <p className="text-xl font-semibold text-gray-800">
-            NPR {book.price}
-          </p> */}
           <div>{renderStars(averageRating)}</div>
 
           <div className="flex flex-wrap gap-2">
@@ -189,6 +190,8 @@ export default function BookPage() {
         </div>
       </div>
 
+      {self.loggedIn &&
+      <>
       {/* Review Form */}
       <div className="space-y-4">
         <h2 className="text-2xl font-semibold text-gray-900">Write a Review</h2>
@@ -208,6 +211,7 @@ export default function BookPage() {
         <textarea
           rows={4}
           value={newComment}
+          disabled={!self.loggedIn}
           onChange={(e) => setNewComment(e.target.value)}
           className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
           placeholder="Write your thoughts here..."
@@ -215,11 +219,14 @@ export default function BookPage() {
 
         <Button
           onClick={handleAddReview}
-          className="bg-primary text-white hover:bg-[#FFA94D]"
+          disabled={!self.loggedIn}
+          className={self.loggedIn ? "bg-primary text-white hover:bg-[#FFA94D]" : `bg-gray-300 text-gray-500 hover:bg-none`}
         >
           Submit Review
         </Button>
       </div>
+      </>
+      }
 
       {/* Reviews */}
       <div className="space-y-4">

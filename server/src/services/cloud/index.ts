@@ -9,6 +9,30 @@ const minioClient = new minio.Client({
   secretKey: config.minio.secretKey,
 });
 
+export async function setup() {
+  const bucketName = config.MINIO_BUCKET;
+  const policy = {
+    Version: "2012-10-17",
+    Statement: [
+      {
+        Action: ["s3:GetObject"],
+        Effect: "Allow",
+        Principal: { AWS: ["*"] },
+        Resource: [`arn:aws:s3:::${bucketName}/*`],
+        Sid: "",
+      },
+    ],
+  };
+
+  const exists = await minioClient.bucketExists(bucketName);
+
+  if (!exists) {
+    await minioClient.makeBucket(bucketName, "");
+  }
+
+  await minioClient.setBucketPolicy(bucketName, JSON.stringify(policy));
+}
+
 export const uploadFile = async (bucketName: string, fileName: string, fileContent: Buffer) => {
   try {
     await minioClient.putObject(bucketName, fileName, fileContent);

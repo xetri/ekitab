@@ -1,7 +1,7 @@
 import express from "express";
 import jwt from "jsonwebtoken";
 import db from "@services/db";
-import { Book, Order, Review, User } from "@db/modals";
+import { Book, Review, User } from "@db/modals";
 import { genReviewId, genOrderId } from "@/utils/id";
 import config from "@/config";
 
@@ -50,84 +50,6 @@ router.get("/publisher/:id", async (req, res) => {
 });
 
 // @ts-ignore
-router.get("/order", async (req, res) => {
-    const ordersRepo = db.getRepository(Order);
-
-    const sessionToken = req.cookies[config.SESSION_COOKIE_KEY];
-    if (!sessionToken) {
-        return res.status(401).json({
-            message: "Unauthorized",
-        })
-    }
-
-    try {
-       jwt.verify(sessionToken, config.JWT_SECRET_KEY);
-       const user = jwt.decode(sessionToken, config.JWT_SECRET_KEY);
-
-       const orders = await ordersRepo.find({
-            where: {
-                buyerId: user.uid,
-            },
-            select: {
-                id: true,
-                bookId: true,
-            }
-       });
-
-       console.log(orders)
-
-       res.json(orders);
-    } catch(e) {
-        return res.status(500).json( { message: e.message } );
-    }
-
-})
-
-// @ts-ignore
-router.get("/order/:bookId", async (req, res) => {
-    const bookId = req.params.bookId;
-    const booksRepo = db.getRepository(Book);
-    const ordersRepo = db.getRepository(Order);
-
-    const sessionToken = req.cookies[config.SESSION_COOKIE_KEY];
-    if (!sessionToken) {
-        return res.status(401).json({
-            message: "Unauthorized",
-        })
-    }
-
-    try {
-        jwt.verify(sessionToken, config.JWT_SECRET_KEY);
-        const user = jwt.decode(sessionToken, config.JWT_SECRET_KEY);
-
-        const book = await booksRepo.findOne({
-            where: {
-                id: bookId
-            }
-        });
-
-        if (!book) {
-            return res.status(404).json({
-                message: "No books found to order",
-            });
-        }
-
-        const order = {
-            id: genOrderId(),
-            buyerId: user.id,
-            bookId: book.id,
-            amount: book.price,
-        }
-
-        await ordersRepo.save(order);
-
-        res.json({ message: "Successfully ordered!" });
-    } catch(e) {
-        return res.status(500).json( { message: e.message } );
-    }
-});
-
-// @ts-ignore
 router.post("/review", async (req, res) => {
     const { id: bookId, rating, comment } = req.body;
     const booksRepo = db.getRepository(Book);
@@ -153,18 +75,18 @@ router.post("/review", async (req, res) => {
             return res.status(404).json({ message: "Book not found" });
         }
 
-        const newReview : Review = {
+        const review = reviewsRepo.create({
             id: genReviewId(),
             user: reviewer.id,
             name: reviewer.name,
             rating,
             comment,
             bookId: book.id
-        } as Review;
+        });
 
-        await reviewsRepo.save(newReview);
+        await reviewsRepo.insert(review);
 
-        res.json({ message: "Review added successfully" });
+        res.json({ review: review, message: "Review added successfully" });
     } catch(e) {
         res.status(500).json({ message: "Internal server error" });
     }

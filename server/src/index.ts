@@ -4,6 +4,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 
 import config from "@/config";
+import * as cloud from "@services/cloud"
 import db from "@services/db";
 import api from "@/routes";
 
@@ -12,8 +13,8 @@ const server = createServer(app);
 
 app.use(express.json());
 app.use(cors({
-    origin: config.CLIENT_URL,
-    credentials: true,
+    origin: "*",
+    // credentials: true,
 }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -27,6 +28,7 @@ app.use("/api", api);
 server.listen(config.PORT, async () => {
     //Initializing and connecting the database
     try {
+        try { await cloud.setup() } catch(e) {}
         await db.initialize();
     } catch(e) {
         console.log("Database: Connection failed,", e.message);

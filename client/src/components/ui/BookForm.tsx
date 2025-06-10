@@ -7,19 +7,19 @@ interface BookFormProps {
     title?: string;
     description?: string;
     author?: string;
-    price?: number;
     categories?: string[];
   };
+  isEditing: boolean;
 }
 
-export default function BookForm({ onSubmit, initialData }: BookFormProps) {
+export default function BookForm({ onSubmit, initialData, isEditing }: BookFormProps) {
   const [formData, setFormData] = useState({
     title: initialData?.title || "",
     description: initialData?.description || "",
     author: initialData?.author || "",
-    price: initialData?.price?.toString() || "",
     categories: (initialData?.categories || []).join(", "),
   });
+  const [editingBook, setEditingBook] = useState(false);
 
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [pdfFile, setPdfFile] = useState<File | null>(null);
@@ -31,20 +31,17 @@ export default function BookForm({ onSubmit, initialData }: BookFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const newBook: Book = {
-      id: "", // This will be set by the backend
+    const newBook = {
       title: formData.title.trim(),
       author: formData.author.trim(),
       description: formData.description.trim(),
-      price: parseFloat(formData.price),
       categories: formData.categories.split(",").map((cat) => cat.trim()),
-      sellerId: "", // This will be set by the backend from the session
     };
 
-    onSubmit(newBook, coverFile as File, pdfFile as File);
-    // setFormData({ title: "", price: "", description: "", categories: "", author: "" });
-    // setCoverFile(null);
-    // setPdfFile(null);
+    onSubmit(newBook as Book, coverFile as File, pdfFile as File);
+    setFormData({ title: "", description: "", categories: "", author: "" });
+    setCoverFile(null);
+    setPdfFile(null);
   };
 
   return (
@@ -52,7 +49,7 @@ export default function BookForm({ onSubmit, initialData }: BookFormProps) {
       onSubmit={handleSubmit}
       className="space-y-5 border border-gray-200 rounded-xl p-6 bg-white shadow-sm max-w-2xl mx-auto"
     >
-      <h2 className="text-2xl font-semibold text-gray-800">📚 Upload a Book</h2>
+      <h2 className="text-2xl font-semibold text-gray-800">📚 {isEditing ? "Edit Book" : "Upload a Book"}</h2>
 
       {/* Title */}
       <div>
@@ -80,21 +77,6 @@ export default function BookForm({ onSubmit, initialData }: BookFormProps) {
         />
       </div>
 
-      {/* Price */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Price (NPR)</label>
-        <input
-          name="price"
-          type="number"
-          min="0"
-          value={formData.price}
-          onChange={handleChange}
-          required
-          placeholder="999"
-          className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary focus:border-primary"
-        />
-      </div>
-
       {/* Description */}
       <div>
         <label className="block text-sm font-medium text-gray-700">Description</label>
@@ -102,13 +84,13 @@ export default function BookForm({ onSubmit, initialData }: BookFormProps) {
           name="description"
           value={formData.description}
           onChange={handleChange}
-          required={true}
           placeholder="Brief description of the book"
           rows={3}
           className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary focus:border-primary"
         />
       </div>
 
+      {!isEditing && <>
       {/* Cover Image File Upload */}
       <div>
         <label className="block text-sm font-medium text-gray-700">Upload Cover Image</label>
@@ -138,6 +120,7 @@ export default function BookForm({ onSubmit, initialData }: BookFormProps) {
           <p className="text-sm text-gray-600 mt-1">Selected: {pdfFile.name}</p>
         )}
       </div>
+      </>}
 
       {/* Categories */}
       <div>
@@ -146,19 +129,20 @@ export default function BookForm({ onSubmit, initialData }: BookFormProps) {
           name="categories"
           value={formData.categories}
           onChange={handleChange}
-          required
-          placeholder="React, TypeScript, Frontend"
+          placeholder="Motivation, Self Help, Philosophy"
           className="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary focus:border-primary"
         />
       </div>
 
-      {/* Submit Button */}
+      {/* Button */}
       <div>
         <button
           type="submit"
           className="w-full bg-primary text-white text-sm font-medium py-2 rounded-lg hover:bg-[#FFA94D] transition"
         >
-          Upload
+          {
+            isEditing ? "Update" : "Upload"
+          }
         </button>
       </div>
     </form>

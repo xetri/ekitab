@@ -23,8 +23,8 @@ export class Book {
   @Column({ type: 'text', array: true, nullable: true })
   categories: string[];
 
-  @Column({ type: 'float', nullable: true })
-  price: number;
+  // @Column({ type: 'float', nullable: true })
+  // price: number;
 
   @Column({ nullable: true })
   sellerId: string;

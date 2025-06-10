@@ -28,14 +28,14 @@ export default async function register(data: SignUpData, res: any) {
         return null;
     }
 
-    const user = new User();
-    user.id = genUserId();
-    user.email = email;
-    user.name = name;
-    user.passwordHash = hashPassword(password);
+    const user = userRepo.create({
+        id: genUserId(),
+        email,
+        name,
+        passwordHash: hashPassword(password)
+    });
 
-    const newUser = userRepo.create(user);
-    userRepo.save(newUser);
+    await userRepo.insert(user);
 
     const sessionId = genSessionId();
     const sessionKey = jwt.sign({
@@ -58,10 +58,11 @@ export default async function register(data: SignUpData, res: any) {
 
     res.status(201).send({
         message: "Account created successfully",
+        session: sessionKey,
         data: {
-            id: newUser.id,
-            email: newUser.email,
-            name: newUser.name,
+            id: user.id,
+            email: user.email,
+            name: user.name,
         }
     });
 }

@@ -9,7 +9,7 @@ const dsConfig : DataSourceOptions = {
     synchronize: true,
     logging: false,
     ssl: config.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
-    entities: [User, Book, Review, Order],
+    entities: [User, Book, Review],
 }
 
 const db = new DataSource(dsConfig);

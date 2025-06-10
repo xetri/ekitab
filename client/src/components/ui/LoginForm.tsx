@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Input, { PasswordInput } from "@ui/Input";
 import { useAuthDialog } from "@lib/store/auth-dialog";
-import { loginSchema, LoginData } from "@ekitab/shared/validation/auth";
+import { loginSchema, LoginData } from "@lib/validation/auth";
 import config from "@/config";
 import { useAuth } from "@lib/store/auth";
 import Spinner from "@ui/Spinner";

@@ -5,7 +5,7 @@ import config from "@/config";
 
 interface Props extends Book {}
 
-function BookCard({ id, title, price, author, categories }: Props) {
+function BookCard({ id, title, author, categories }: Props) {
   const navigate = useNavigate();
 
   const handleCardClick = () => {
@@ -49,8 +49,7 @@ function BookCard({ id, title, price, author, categories }: Props) {
             </div>
           )}
         </div>
-          <p className="text-sm text-gray-500">by {author}</p>
-          <p className="text-sm text-gray-800">NPR {price.toLocaleString()}</p>
+          <p className="text-sm text-gray-500">{author}</p>
 
            <div className="flex flex-wrap gap-1 mt-1">
             {categories.map((category) => (

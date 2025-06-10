@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "react-toastify";
 import config from "@/config";
 import Input, { PasswordInput } from "@ui/Input";
-import { signupSchema, SignUpData } from "@ekitab/shared/validation/auth";
+import { signupSchema, SignUpData } from "@lib/validation/auth";
 import { useAuth } from "@lib/store/auth";
 import { useAuthDialog } from "@lib/store/auth-dialog";
 
